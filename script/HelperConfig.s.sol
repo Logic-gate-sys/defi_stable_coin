@@ -2,9 +2,9 @@
 
 import {Script} from "forge-std/Script.sol";
 import {MockV3Aggregator} from "lib/chainlink-brownie-contracts/contracts/src/v0.8/tests/MockV3Aggregator.sol";
-import {ERC20Mock} from  '../test/ERC20Mock.sol';
+import {ERC20Mock} from "../test/ERC20Mock.sol";
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 contract HelperConfig is Script {
     uint8 public constant DECIMALS = 8;
@@ -12,8 +12,8 @@ contract HelperConfig is Script {
     int256 public constant BTC_USD_PRICE = 1000e8;
     uint256 public constant DEFAULT_ANVIL_PRIVATE_KEY =
         0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
-
     //Network Config
+
     struct NetworkConfig {
         address wEthUSDPriceFeed;
         address wBTCUSDPriceFeed;
@@ -27,10 +27,10 @@ contract HelperConfig is Script {
 
     // constructor
     constructor() {
-        if (block.chainid != 11155111) {
-            activeNetworkConfig = getOrCreateAnvilEthConfig();
-        } else {
+        if (block.chainid == 11155111) {
             activeNetworkConfig = getSepoliaEthConfig();
+        } else {
+            activeNetworkConfig = getOrCreateAnvilEthConfig();
         }
     }
 
@@ -43,6 +43,7 @@ contract HelperConfig is Script {
             wBTC: 0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063,
             deployerKey: vm.envUint("PRIVATE_KEY")
         });
+        return sepoliaNetworkConfig;
     }
     // anvil config
 
@@ -61,12 +62,13 @@ contract HelperConfig is Script {
         vm.stopBroadcast();
 
         NetworkConfig memory anvilNetworkConfig = NetworkConfig({
-            wEthUSDPriceFeed: address(wEthUSDPriceFeed), // ETH / USD
-            wEth: address(wethMock),
+            wEthUSDPriceFeed: address(wEthUSDPriceFeed),
             wBTCUSDPriceFeed: address(wBTCUSDPriceFeed),
+            wEth: address(wethMock),
             wBTC: address(wbtcMock),
             deployerKey: DEFAULT_ANVIL_PRIVATE_KEY
         });
+        activeNetworkConfig = anvilNetworkConfig;
         return anvilNetworkConfig;
     }
 }
